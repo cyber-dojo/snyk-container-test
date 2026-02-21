@@ -8,6 +8,10 @@ inputs:
   IMAGE_NAME:
     description: "Docker image name, eg ghcr.io/cyber-dojo/saver:9a88d8f"
     required: true
+  SARIF_FILENAME:
+    description: "The filename to create in the snyk-test and upload in the kosli-assert"
+    required: false
+    default: "snyk.container.scan.json"
   KOSLI_CLI_VERSION:
     description: "Version of Kosli CLI, eg 2.11.43"
     required: true
@@ -17,8 +21,6 @@ inputs:
 
 runs:
   using: "composite"
-  env:
-    SARIF_FILENAME: snyk.container.scan.json
   steps:
     - name: Harden Runner
       uses: step-security/harden-runner@v2
