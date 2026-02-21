@@ -2,17 +2,17 @@ name: Snyk Container Test
 description: ''
 
 inputs:
-  SNYK_TOKEN:
+  snyk_token:
     description: "Snyk authentication token"
     required: true
-  IMAGE_NAME:
+  image_name:
     description: "Docker image name, eg ghcr.io/cyber-dojo/saver:9a88d8f"
     required: true
-  SARIF_FILENAME:
+  sarif_filename:
     description: "The filename to create in the snyk-test and upload in the kosli-assert"
     required: false
     default: "snyk.container.scan.json"
-  KOSLI_CLI_VERSION:
+  kosli_cli_version:
     description: "Version of Kosli CLI, eg 2.11.43"
     required: true
   attestation_name:
@@ -29,6 +29,8 @@ runs:
 
     - name: Load image from registry
       uses: cyber-dojo/load-image-from-registry@main
+      with:
+        image_name: "${{ inputs.image_name }}"
 
     - name: Setup Snyk CLI
       uses: snyk/actions/setup@master
@@ -42,25 +44,25 @@ runs:
     - name: Run Snyk container scan
       shell: bash
       env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        SNYK_TOKEN: ${{ inputs.snyk_token }}
       run:
-        snyk container test "${IMAGE_NAME}"
+        snyk container test "${{ inputs.image_name }}"
           --policy-path=.snyk
           --sarif
-          --sarif-file-output="${SARIF_FILENAME}"
+          --sarif-file-output="${{ inputs.sarif_filename }}"
 
     - name: Setup Kosli CLI
       if: ${{ github.ref == 'refs/heads/main' && (success() || failure()) }}
       uses: kosli-dev/setup-cli-action@v2
       with:
-        version: ${{ inputs.KOSLI_CLI_VERSION }}
+        version: ${{ inputs.kosli_cli_version }}
 
     - name: Attest evidence to Kosli
       shell: bash
       if: ${{ github.ref == 'refs/heads/main' && (success() || failure()) }}
       run:
-        kosli attest snyk "${IMAGE_NAME}"
+        kosli attest snyk "${{ inputs.image_name }}"
           --artifact-type=oci
           --attachments=.snyk
           --name="${{ inputs.attestation_name }}"
-          --scan-results="${SARIF_FILENAME}"
+          --scan-results="${{ inputs.sarif_filename }}"

@@ -28,13 +28,12 @@ jobs:
     permissions:
       id-token: write
       contents: write
-    env:
-      IMAGE_NAME:        ${{ needs.build-image.outputs.tagged_image_name }}
-      KOSLI_FINGERPRINT: ${{ needs.build-image.outputs.digest }}
-      SARIF_FILENAME:    snyk.container.scan.json
     steps:
         uses: cyber-dojo/snyk-container-test@main
         with:
-          attestation_name: saver.snyk-container-scan
+          snyk_token:        ${{ secrets.SNYK_TOKEN }}
+          image_name:        ${{ needs.build-image.outputs.tagged_image_name }}
+          kosli_cli_version: ${{ vars.KOSLI_CLI_VERSION }}
+          attestation_name:  saver.snyk-container-scan
   ...
 ```
