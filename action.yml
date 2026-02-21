@@ -18,8 +18,7 @@ inputs:
     default: "snyk.container.scan.json"
   kosli_cli_version:
     description: "Version of Kosli CLI, eg 2.11.43"
-    required: false
-    default: ${{ vars.KOSLI_CLI_VERSION }}
+    required: true
   attestation_name:
     description: "Value for: kosli-attest-snyk --name"
     required: true
