@@ -1,0 +1,51 @@
+name: Snyk Container Test
+description: ''
+
+inputs:
+  attestation_name:
+    description: "Value for: kosli-attest-snyk --name"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@v2
+      with:
+        egress-policy: audit
+
+    - name: Load image from registry
+      uses: cyber-dojo/load-image-from-registry@main
+
+    - name: Setup Snyk
+      uses: snyk/actions/setup@master
+      with:
+        snyk-version: v1.1300.2        
+
+    - uses: actions/checkout@v4
+
+    - name: Run Snyk container scan
+      shell: bash
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      run:
+        snyk container test "${IMAGE_NAME}"
+          --policy-path=.snyk
+          --sarif
+          --sarif-file-output="${SARIF_FILENAME}"
+
+    - name: Setup Kosli CLI
+      shell: bash
+      if: ${{ github.ref == 'refs/heads/main' && (success() || failure()) }}
+      uses: kosli-dev/setup-cli-action@v2
+      with:
+        version: ${{ vars.KOSLI_CLI_VERSION }}
+
+    - name: Attest evidence to Kosli
+      shell: bash
+      if: ${{ github.ref == 'refs/heads/main' && (success() || failure()) }}
+      run:
+        kosli attest snyk
+          --attachments=.snyk
+          --name="${{ inputs.attestation_name }}"
+          --scan-results="${SARIF_FILENAME}"
