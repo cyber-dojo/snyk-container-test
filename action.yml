@@ -62,7 +62,7 @@ runs:
       if: ${{ github.ref == 'refs/heads/main' && (success() || failure()) }}
       run:
         kosli attest snyk "${{ inputs.image_name }}"
-          --artifact-type=oci
+          --artifact-type=docker
           --attachments=.snyk
           --name="${{ inputs.attestation_name }}"
           --scan-results="${{ inputs.sarif_filename }}"
