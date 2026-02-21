@@ -17,7 +17,7 @@ runs:
     - name: Load image from registry
       uses: cyber-dojo/load-image-from-registry@main
 
-    - name: Setup Snyk
+    - name: Setup Snyk CLI
       uses: snyk/actions/setup@master
       with:
         snyk-version: v1.1300.2        
