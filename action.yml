@@ -2,15 +2,23 @@ name: Snyk Container Test
 description: ''
 
 inputs:
-  attestation_name:
-    description: "Value for: kosli-attest-snyk --name"
-    required: true
   SNYK_TOKEN:
     description: "Snyk authentication token"
+    required: true
+  IMAGE_NAME:
+    description: "Docker image name, eg ghcr.io/cyber-dojo/saver:9a88d8f"
+    required: true
+  KOSLI_CLI_VERSION:
+    description: "Version of Kosli CLI, eg 2.11.43"
+    required: true
+  attestation_name:
+    description: "Value for: kosli-attest-snyk --name"
     required: true
 
 runs:
   using: "composite"
+  env:
+    SARIF_FILENAME: snyk.container.scan.json
   steps:
     - name: Harden Runner
       uses: step-security/harden-runner@v2
@@ -26,6 +34,8 @@ runs:
         snyk-version: v1.1300.2        
 
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
 
     - name: Run Snyk container scan
       shell: bash
@@ -41,13 +51,14 @@ runs:
       if: ${{ github.ref == 'refs/heads/main' && (success() || failure()) }}
       uses: kosli-dev/setup-cli-action@v2
       with:
-        version: ${{ vars.KOSLI_CLI_VERSION }}
+        version: ${{ inputs.KOSLI_CLI_VERSION }}
 
     - name: Attest evidence to Kosli
       shell: bash
       if: ${{ github.ref == 'refs/heads/main' && (success() || failure()) }}
       run:
-        kosli attest snyk
+        kosli attest snyk "${IMAGE_NAME}"
+          --artifact-type=oci
           --attachments=.snyk
           --name="${{ inputs.attestation_name }}"
           --scan-results="${SARIF_FILENAME}"
