@@ -8,14 +8,17 @@ inputs:
   image_name:
     description: "Docker image name, eg ghcr.io/cyber-dojo/saver:9a88d8f"
     required: true
+  policy_path:
+    description: "The filename for the snyk --policy-path, eg .snyk"
+    required: false
+    default: ".snyk"
   sarif_filename:
     description: "The filename to create in the snyk-test and upload in the kosli-assert"
     required: false
     default: "snyk.container.scan.json"
   kosli_cli_version:
     description: "Version of Kosli CLI, eg 2.11.43"
-    required: false
-    default: "${{ vars.KOSLI_CLI_VERSION }}"
+    required: true
   attestation_name:
     description: "Value for: kosli-attest-snyk --name"
     required: true
@@ -48,7 +51,7 @@ runs:
         SNYK_TOKEN: ${{ inputs.snyk_token }}
       run:
         snyk container test "${{ inputs.image_name }}"
-          --policy-path=.snyk
+          --policy-path="${{ inputs.policy_path }}"
           --sarif
           --sarif-file-output="${{ inputs.sarif_filename }}"
 
@@ -64,6 +67,6 @@ runs:
       run:
         kosli attest snyk "${{ inputs.image_name }}"
           --artifact-type=docker
-          --attachments=.snyk
+          --attachments="${{ inputs.policy_path }}"
           --name="${{ inputs.attestation_name }}"
           --scan-results="${{ inputs.sarif_filename }}"
