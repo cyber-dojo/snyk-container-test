@@ -60,20 +60,16 @@ runs:
           --sarif-file-output="${{ inputs.sarif_filename }}"
 
     - name: Setup Kosli CLI
-      if: |
-        ${{ github.ref == 'refs/heads/main' && 
-            (success() || failure()) &&
-            inputs.attest_to_kosli == 'true' }}
+      if:
+        ${{ github.ref == 'refs/heads/main' && (success() || failure()) && inputs.attest_to_kosli == 'true' }}
       uses: kosli-dev/setup-cli-action@v2
       with:
         version: ${{ inputs.kosli_cli_version }}
 
     - name: Attest evidence to Kosli
       shell: bash
-      if: |
-        ${{ github.ref == 'refs/heads/main' && 
-            (success() || failure()) &&
-            inputs.attest_to_kosli == 'true' }}
+      if:
+        ${{ github.ref == 'refs/heads/main' && (success() || failure()) && inputs.attest_to_kosli == 'true' }}
       run:
         kosli attest snyk "${{ inputs.image_name }}"
           --artifact-type=docker
