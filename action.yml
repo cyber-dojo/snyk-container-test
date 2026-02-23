@@ -16,10 +16,6 @@ inputs:
     description: "The filename to create in the snyk-test and upload in the kosli-assert"
     required: false
     default: "snyk.container.scan.json"
-  attest_to_kosli:
-    description: "Whether to install Kosli CLI and make attestations"
-    required: false
-    default: 'true'
   kosli_cli_version:
     description: "Version of Kosli CLI, eg 2.11.43"
     required: true
@@ -61,7 +57,7 @@ runs:
 
     - name: Setup Kosli CLI
       if:
-        ${{ github.ref == 'refs/heads/main' && (success() || failure()) && inputs.attest_to_kosli == 'true' }}
+        ${{ github.ref == 'refs/heads/main' && (success() || failure()) }}
       uses: kosli-dev/setup-cli-action@v2
       with:
         version: ${{ inputs.kosli_cli_version }}
@@ -69,7 +65,7 @@ runs:
     - name: Attest evidence to Kosli
       shell: bash
       if:
-        ${{ github.ref == 'refs/heads/main' && (success() || failure()) && inputs.attest_to_kosli == 'true' }}
+        ${{ github.ref == 'refs/heads/main' && (success() || failure()) }}
       run:
         kosli attest snyk "${{ inputs.image_name }}"
           --artifact-type=docker
