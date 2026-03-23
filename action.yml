@@ -41,7 +41,7 @@ runs:
       with:
         snyk-version: v1.1300.2        
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 1
 
