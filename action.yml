@@ -58,7 +58,7 @@ runs:
     - name: Setup Kosli CLI
       if:
         ${{ github.ref == 'refs/heads/main' && (success() || failure()) }}
-      uses: kosli-dev/setup-cli-action@v2
+      uses: kosli-dev/setup-cli-action@v3
       with:
         version: ${{ inputs.kosli_cli_version }}
 
